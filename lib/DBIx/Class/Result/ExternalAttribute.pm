@@ -2,7 +2,7 @@ package DBIx::Class::Result::ExternalAttribute;
 
 use strict;
 use warnings;
-use Carp 'croak';
+use Carp;
 
 =head1 NAME
 
@@ -10,12 +10,12 @@ DBIx::Class::Result::ExternalAttribute - The great new DBIx::Class::Result::Exte
 
 =head1 VERSION
 
-Version 0.01
+Version 0.02
 
 =cut
 
 # version
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
 # use base
 use base qw/ DBIx::Class Class::Accessor::Grouped /;
@@ -48,7 +48,7 @@ for example artist result:
           't::app::Main::Result::ArtistAttribute',
         'artist_id'
     );
-    __PACKAGE__->register_relationships_columns_data();
+    __PACKAGE__->register_relationships_column_data();
 
 use a artist attribute result:
 
@@ -68,9 +68,9 @@ use a artist attribute result:
 
 with this configuration, you can call methods:
 
-    $artist->columns_data => get only columns of artist result
+    $artist->get_column_data => get only columns of artist result
 
-    $artist->columns_data_with_attribute => get columns of Artist and ArtistAttribute result except artist_id
+    $artist->get_column_data_with_attribute => get columns of Artist and ArtistAttribute result except artist_id
 
     #update with artist attributes
     $artist->update({name => "Me", year_old => 15});
@@ -129,20 +129,26 @@ sub init_external_attribute {
     $klass->rh_klass_attribute_column( $rel, \@columns );
 }
 
-=head2 columns_data_with_attribute
+=head2 get_column_data_with_attribute
 
-extract columns_data with attribute column
+extract column_data with attribute column
 
 =cut
 
 sub columns_data_with_attribute {
+    carp "columns_data_with_external_attribute is deprecated, please use get_column_data_with_attribute";
+    my $self = shift;
+    $self->get_column_data_with_attribute(@_);
+}
+
+sub get_column_data_with_attribute {
     my $self      = shift;
     my $klass     = ref $self;
-    my $rh_result = $self->columns_data();
+    my $rh_result = $self->get_column_data();
     foreach my $rel_attr ( keys %{ $klass->rh_klass_attribute_column } ) {
         my $rel_object = $self->$rel_attr;
         next unless defined $rel_object;
-        my $rh_result_attribute = $self->$rel_attr->columns_data();
+        my $rh_result_attribute = $self->$rel_attr->get_column_data();
         foreach my $col ( @{ $klass->rh_klass_attribute_column($rel_attr) } ) {
             $rh_result->{$col} = $rh_result_attribute->{$col};
         }
