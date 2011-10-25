@@ -10,12 +10,12 @@ DBIx::Class::Result::ExternalAttribute - The great new DBIx::Class::Result::Exte
 
 =head1 VERSION
 
-Version 0.03
+Version 0.04
 
 =cut
 
 # version
-our $VERSION = '0.03';
+our $VERSION = '0.04';
 
 # use base
 use base qw/ DBIx::Class Class::Accessor::Grouped /;
@@ -109,15 +109,15 @@ sub rh_klass_attribute_column {
 
 =head2 init_external_attribute
 
-init function, declare might have relationships
+init function, declare has one relationships
 
 =cut
 
 sub init_external_attribute {
     my ( $klass, $rel, $klass_attribute, $external_key ) = @_;
 
-    # declare might_have relation
-    $klass->might_have( $rel, $klass_attribute, $external_key );
+    # declare has_one relation
+    $klass->has_one( $rel, $klass_attribute, $external_key );
 
     # create accessor for each column
 #  $klass->mk_group_accessors(simple => $klass_attribute->columns);
@@ -202,6 +202,22 @@ sub update {
     return $self->next::method($rh_fields);
 }
 
+=head2 insert
+
+overdefinition of update function
+
+=cut
+sub insert 
+{
+    my ( $self, @args ) = @_;
+    my $klass = ref $self;
+    $self->next::method(@args);
+    foreach my $rel ( keys %{ $klass->rh_klass_attribute_column } ) {
+        $self->find_or_create_related($rel, {});
+    }
+    return $self;
+}
+
 =head1 AUTHOR
 
 Nicolas Oudard, C<< <nicolas at oudard.org> >>
@@ -262,3 +278,4 @@ See http://dev.perl.org/licenses/ for more information.
 =cut
 
 1; # End of DBIx::Class::Result::ExternalAttribute
+
