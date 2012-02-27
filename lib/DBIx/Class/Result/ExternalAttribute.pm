@@ -10,12 +10,12 @@ DBIx::Class::Result::ExternalAttribute - The great new DBIx::Class::Result::Exte
 
 =head1 VERSION
 
-Version 0.05
+Version 0.06
 
 =cut
 
 # version
-our $VERSION = '0.05';
+our $VERSION = '0.06';
 
 # use base
 use base qw/ DBIx::Class Class::Accessor::Grouped /;
